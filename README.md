@@ -47,15 +47,16 @@ javascript
 
 Copy code
 >const formattedDate = `${date.getMonth() + 1}_${date.getDate()}_${date.getFullYear()}`;
-let fileName = `${formattedDate}_report_1.txt`; 
+>let fileName = `${formattedDate}_report_1.txt`; 
 // Customize the file naming format
 The script also includes a function generateReportContent to format the content of the text file. You can modify this function according to your preferences.
 
 Folder Structure
 
 reports: The directory where the text report files are stored.
-const formattedDate = `${date.getMonth() + 1}_${date.getDate()}_${date.getFullYear()}`;
-let fileName = `${formattedDate}_report_1.txt`; // Customize the file naming format
+>const formattedDate = `${date.getMonth() + 1}_${date.getDate()}_${date.getFullYear()}`;
+>let fileName = `${formattedDate}_report_1.txt`;
+// Customize the file naming format
 The script also includes a function generateReportContent to format the content of the text file. You can modify this function according to your preferences.
 
 Folder Structure
