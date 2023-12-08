@@ -1,67 +1,79 @@
 const fs = require('fs');
 const path = require('path');
 
-// Load the JSON file with the test run results
-const rawdata = fs.readFileSync('postman_results.json'); // Replace 'postman_results.json' with the name of your file
-const report = JSON.parse(rawdata);
+function loadJsonFile(filePath) {
+    const rawdata = fs.readFileSync(filePath);
+    return JSON.parse(rawdata);
+}
 
-// Check if the test run results are defined
-if (report && report.results) {
-    // Process overall statistics
-    console.log('Overall Statistics:');
-    console.log('-------------------');
-    console.log(`Collection Name: ${report.name}`);
-    console.log(`Timestamp: ${report.timestamp}`);
-    console.log(`Total Successful Requests: ${report.totalPass}`);
-    console.log(`Total Failed Requests: ${report.totalFail}`);
-    console.log(`Total Execution Time: ${report.totalTime} ms`);
-    console.log(`Status: ${report.status}`);
-    console.log('\n');
-
-    // Process results for each request
-    console.log('Details for Each Request:');
-    console.log('-------------------------');
-    report.results.forEach((result, index) => {
-        console.log(`Request #${index + 1}: ${result.name}`);
-        console.log(`   URL: ${result.url}`);
-        console.log(`   Execution Time: ${result.time} ms`);
-        console.log(`   Response Code: ${result.responseCode}`);
-        console.log('   Test Results:');
-        Object.keys(result.tests).forEach(testName => {
-            console.log(`      ${testName}: ${result.tests[testName]}`);
-        });
-        console.log('\n');
-    });
-
-    // Create a directory if it doesn't exist
-    const dir = 'reports';
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
+function createDirectoryIfNotExists(directory) {
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory);
     }
+}
 
-    // Generate a file name based on the current date
+function generateFileName() {
     const date = new Date();
-    const formattedDate = `${date.getMonth() + 1}_${date.getDate()}_${date.getFullYear()}`;
+    const formattedDate = `${date.getFullYear()}_${padZero(date.getMonth() + 1)}_${padZero(date.getDate())}`;
     let fileNumber = 1;
     let fileName = `${formattedDate}_report_1.txt`;
 
-    // Check if a file with the same name exists and increment the number
-    while (fs.existsSync(path.join(dir, fileName))) {
+    while (fs.existsSync(path.join('reports', fileName))) {
         fileNumber++;
         fileName = `${formattedDate}_report_${fileNumber}.txt`;
     }
 
-    // Save the results to a text file
-    const filePath = path.join(dir, fileName);
-    const content = generateReportContent(report);
-    fs.writeFileSync(filePath, content);
-
-    console.log(`Results saved in the file: ${filePath}`);
-} else {
-    console.error('Incorrect data in the JSON file of test run results.');
+    return fileName;
 }
 
-// Function to generate the content for the text file
+function padZero(value) {
+    return value.toString().padStart(2, '0');
+}
+
+function saveResultsToFile(filePath, content) {
+    fs.writeFileSync(filePath, content);
+}
+
+function processTestResults(report) {
+    if (report && report.results) {
+        console.log('Overall Statistics:');
+        console.log('-------------------');
+        console.log(`Collection Name: ${report.name}`);
+        console.log(`Timestamp: ${report.timestamp}`);
+        console.log(`Total Successful Requests: ${report.totalPass}`);
+        console.log(`Total Failed Requests: ${report.totalFail}`);
+        console.log(`Total Execution Time: ${report.totalTime} ms`);
+        console.log(`Status: ${report.status}`);
+        console.log('\n');
+
+        console.log('Details for Each Request:');
+        console.log('-------------------------');
+        report.results.forEach((result, index) => {
+            console.log(`Request #${index + 1}: ${result.name}`);
+            console.log(`   URL: ${result.url}`);
+            console.log(`   Execution Time: ${result.time} ms`);
+            console.log(`   Response Code: ${result.responseCode}`);
+            console.log('   Test Results:');
+            Object.keys(result.tests).forEach(testName => {
+                console.log(`      ${testName}: ${result.tests[testName]}`);
+            });
+            console.log('\n');
+        });
+
+        const dir = 'reports';
+        createDirectoryIfNotExists(dir);
+
+        const fileName = generateFileName();
+        const filePath = path.join(dir, fileName);
+        const content = generateReportContent(report);
+        saveResultsToFile(filePath, content);
+
+        console.log(`Results saved in the file: ${filePath}`);
+    } else {
+        console.error('Incorrect data in the JSON file of test run results.');
+    }
+}
+
 function generateReportContent(report) {
     let content = `Overall Statistics:\n`;
     content += `-------------------\n`;
@@ -91,3 +103,7 @@ function generateReportContent(report) {
 
     return content;
 }
+
+const inputFileName = 'postman_results.json';
+const report = loadJsonFile(inputFileName);
+processTestResults(report);
